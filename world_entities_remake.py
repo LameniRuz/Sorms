@@ -1,8 +1,9 @@
 from general_classes import Block
 from global_variables import *
 #from collision_system import CollisionDict
-from random import randrange 
+from random import randrange, randint
 from player_entities import Worm
+
 
 class Food():
 
@@ -56,16 +57,47 @@ class Food():
 class EnemyWorm(Worm):
     def __init__(self, head_x, head_y, worm_name, global_food, global_collision_dict, **kwargs):
         super().__init__(head_x, head_y, worm_name, global_food, global_collision_dict, **kwargs)
-    
+       
 
-    def go_to_random_food(self):
-        pass
+
+        # Random food targeting
+        self.food_eaten = True 
+        self.food_target = None
    
     
+
+    def _chose_random_food(self):
+        random_food_num = randint(1, len(self.global_food.food_dict))
+        count = 0
+        for _, food in self.global_food.food_dict.items():
+            count += 1
+            if count ==  random_food_num :
+                self.food_target = food
+                self.food_eaten = False
+                break
+
+
+
+    def go_to_random_food(self):#NOTE this code is messy!!!
+        if self.food_target:# Chech is the food still exists
+            tget_exists = self.global_food.food_dict.get( (self.food_target.x, self.food_target.y) )
+            if not tget_exists:
+                print("Current food Does not exist")
+                self._chose_random_food()# choose new target
+        else: # if there is no food target at all choose one
+            self._chose_random_food()
+            print("No food Target, choosing a new one")
+
+        self.go_to_coords(self.food_target.x, self.food_target.y)
+        # print(f"go_to_random_food {self.food_target.x} {self.food_target.y}")
+
+   
+    #NOTE this is very infeficcient needs aproper pathing algo later? 
     def change_direction(self, new_direction):
         """Changes worm direction if posiible,returns True if direction is changed
         if direction is changes to the opposite one, returns False, direction remains
         """
+        print(f"Change dir from {self.direction} to {new_direction}")
         current_direction = self.direction
         prevent_change_in = PREV_DIR_CHANGE[current_direction]
         if new_direction != prevent_change_in:
@@ -83,10 +115,10 @@ class EnemyWorm(Worm):
         """#NOTE in development
         if head_crd > target_crd:
             #Go left
-            return self.change_direction("LEFT")
+            return self.change_direction(head_grtr_dir)
         if head_crd < target_crd: 
             #Go right 
-            return self.change_direction("RIGHT")
+            return self.change_direction(head_sml_dir)
         return False
 
 
@@ -106,6 +138,7 @@ class EnemyWorm(Worm):
                 y_dir_change = self.go_to_coord_x_or_y(target_y, head_y, "UP","DOWN") 
 
         else:
+            x_dir_change = self.go_to_coord_x_or_y(target_x, head_x, "LEFT","RIGHT") 
             y_dir_change = self.go_to_coord_x_or_y(target_y, head_y, "UP","DOWN") 
             if not y_dir_change:
                 x_dir_change = self.go_to_coord_x_or_y(target_x, head_x, "LEFT","RIGHT") 

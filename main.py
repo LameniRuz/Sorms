@@ -5,6 +5,7 @@ from sys import exit
 from random import randrange
 
 
+
 # import helper functions
 from  helper_functions import get_keycode_mapping, get_new_pastel_rgb_color
 # import globals
@@ -16,10 +17,9 @@ from collision_system import CollisionDict
 from player_entities import Worm
 # import other player_entities 
 #from world_entities import Food i deleted this file after a lot of work on it;( 
-from world_entities_remake import Food 
+from world_entities_remake import Food, EnemyWorm
 
-
-pg.init() # Initiate pygame
+pg.init() # initiate pygame
 
 # Basic set up #
 screen = pg.display.set_mode(screen_size)
@@ -144,6 +144,7 @@ class Game():
         self.active_players_num = len(self.players)
 
         
+        self.enemy_TEST = EnemyWorm(BLOCK_SIZE*40, BLOCK_SIZE*50, "Hungus", self.global_food, self.global_collision_dict, head_color=(0,0,0) )
 
         self.global_food.spawn()
 
@@ -218,6 +219,10 @@ class Game():
                 # World entities
                 #pass
 
+                #TEST enemy worm
+                self.enemy_TEST.go_to_random_food()
+                self.enemy_TEST.update(screen)
+
                 # Player actions 
                 for player in self.players:
                     player.update(screen)
@@ -251,7 +256,6 @@ class Game():
                 # Control game speed, fps
                 pg.time.wait(self.game_speed) 
                 clock.tick(60)
-
 
 
 
